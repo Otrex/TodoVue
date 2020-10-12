@@ -5,10 +5,13 @@ var StarBackGround = {
     },
     options : {
         bg : "black",
+        moveType : "move",
         obj : {
-            count : 5,
-            max_radius : 10,
-            color : ["red", "white","green"]
+            count : 10,
+            maxRadius : 10,
+            color : ["white"],
+            speedX : 1,
+            speedY : 1
         }
     },
 
@@ -29,7 +32,11 @@ var StarBackGround = {
 
     init_canvas : function(_class = "rex_canvas") {
         // Creates the Canvas
-        window.cn = doc.createElement("canvas");
+        if (doc.querySelector("canvas."+_class)) {
+            window.cn = doc.querySelector("canvas."+_class);
+        } else {
+            window.cn = doc.createElement("canvas");
+        }
         window.ctx = cn.getContext("2d");
 
         // Adding Stylings
@@ -55,9 +62,10 @@ var StarBackGround = {
                 new Circle({
                     x : randPos(cn.width - 20),
                     y: randPos(cn.height - 20), 
-                    r : randPos(this.options.obj.max_radius),
-                    dx : randPos(10),
-                    dy : randPos(10),
+                    r : randPos(this.options.obj.maxRadius),
+                    dx : randPos(this.options.obj.speedX),
+                    dy : randPos(this.options.obj.speedY),
+                    rad : randPos(cn.height),
                     color :  this.options.obj.color[randPos(this.options.obj.color.length)]
                 })
             ) 
@@ -69,17 +77,20 @@ var StarBackGround = {
     start : function() {
         this.init();
         this.init_objects();
-        move();
+        
+        move(this.options.moveType);
     }
 }
 
-function Circle (opts = {x : 10, y :10, r: 10, dx :1, dy: 1, color :"white", stroke: false}){
+function Circle (opts = {x : 10, y :10, r: 10, dx :1, dy: 1, color :"white", stroke: false, rad : 50}){
     this.x = opts.x
     this.y = opts.y
     this.r = opts.r
     this.c = opts.color
     this.dx = opts.dx
     this.dy = opts.dy
+    this.theta = opts.x
+    this.rad = opts.rad
 
     this.draw = function(){
         ctx.beginPath();
@@ -103,30 +114,80 @@ function Circle (opts = {x : 10, y :10, r: 10, dx :1, dy: 1, color :"white", str
 
         this.draw();
     }
+
+    this.circulate = function () {
+        //console.log("circulating")
+        this.x = (this.rad * Math.sin(this.theta* (Math.PI/180))) + cn.width/2
+        this.y = (this.rad * Math.cos(this.theta* (Math.PI/180))) + cn.height/2
+        
+        this.theta = this.theta + (this.dx + this.dy)/2 ;
+
+        // if (this.x > cn.width || this.x < 0){
+        //     this.x = 0;
+        // }
+
+        // if (this.y > cn.height || this.y < 0){
+        //     this.y = 0;
+        // }
+
+        this.draw();
+    }
+
+    this.blizzard = function () {
+        //console.log("circulating")
+        
+        this.x = this.x + this.rad * Math.sin(this.theta* (Math.PI/360))
+        this.y = this.y + this.rad * Math.cos(this.theta* (Math.PI/360))
+        
+        this.theta = this.theta + (this.dy/10000);
+
+        if (this.x > cn.width - this.r || this.x < this.r){
+            this.x = this.r + this.rad * Math.sin(this.theta* (Math.PI));
+            this.theta = 0
+        }
+
+        if (this.y > cn.height - this.r || this.y < this.r){
+            this.y = this.r + this.rad * Math.sin(this.theta* (Math.PI));
+            this.theta = 0
+        }
+
+        this.draw();
+    }
 }
 
-// function createObjects (n, keys){
-//     Obj = []
-//     for (var index = 0; index < n; index++) {
-//         Obj.push(
-//             new Circle(keys)
-//         ) 
-//     }
-
-//     return Obj;
-// }
-
-function move(){
+function move(mov){
     ctx.clearRect(0, 0, innerWidth, innerHeight);
+    switch (mov) {
+        case "move":
+            fn = function (o) {o.move()}
+            break;
+
+        case "circulate":
+            fn = function (o) {o.circulate()}
+            break;
+
+        case "blizzard":
+            fn = function (o) {o.blizzard()}
+            break;
+
+        default:
+            break;
+    }
     Objects.forEach(e => {
-        e.move()
+        fn(e);
     });
     setTimeout(move, 100)
 }
 
+// StarBackGround.options.moveType = "circulate";
+// StarBackGround.options.bg = "blue";
+// StarBackGround.options.obj.count = 10;
+// StarBackGround.options.obj.color.push("yellow");
 
-StarBackGround.options.bg = "black";
-StarBackGround.options.obj.count = 100;
-StarBackGround.options.obj.color.push("yellow");
+// StarBackGround.start();
 
-StarBackGround.start();
+// Allias
+
+sb = StarBackGround;
+
+

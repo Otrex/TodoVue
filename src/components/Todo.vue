@@ -1,6 +1,7 @@
 <template>
 <div class="todo">
     <h1 style="color:white;"> My Todo App </h1>
+
     <input type="text" class="main-input" v-model="entry" @keyup.enter="add">
     <br>{{entry}}<br>
 
@@ -19,6 +20,7 @@ export default {
         todoList: [],
         entry: null
     }),
+
     methods: {
         add: function () {
             this.todoList.push(this.entry.toUpperCase());
@@ -33,6 +35,10 @@ export default {
 </script>
 
 <style scoped>
+* {
+    transition: all 1s;
+}
+
 input.main-input {
     height: 50px;
     width: 70%;
@@ -40,6 +46,12 @@ input.main-input {
     border-radius: 5px;
     font-size: 30px;
     padding: 0px 10px;
+    background: grey;
+}
+
+input.main-input:focus,
+input.main-input:hover {
+    background: white;
 }
 
 .entry-list {
